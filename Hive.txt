@@ -1,0 +1,10 @@
+winSCP:- copy copying or tranfer data fromn local to cloudera
+
+sqoop command:- for data migratiuon and transformation
+
+hql :- hive query language
+
+HDFS:- storage in hive
+ Cloudera documentation for hive 
+
+
