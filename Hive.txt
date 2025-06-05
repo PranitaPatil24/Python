@@ -1,10 +1,215 @@
-winSCP:- copy copying or tranfer data fromn local to cloudera
+sudo su hduser
+cd
+start-dfs.sh
+start-yarn.sh
+jps
+cd /usr/local/hive/bin
+./hive
 
-sqoop command:- for data migratiuon and transformation
+show databases;
 
-hql :- hive query language
+create database hiv;
 
-HDFS:- storage in hive
- Cloudera documentation for hive 
+create table books(bname string,price int,author string) 
+row format delimited 
+fields terminated by ',' 
+stored as textfile;
+
+show tables;
+
+OR
+
+load data local inpath '/home/student/Desktop/books.txt' 
+into table books; 
+
+INSERT INTO TABLE books VALUES
+('Chava', 500, 'Shivaji Desai'),
+('Swami', 300, 'Ranjit Desai'),
+('Yugandhar', 900, 'Shivaji Sawant');
+
+
+CREATE TABLE IF NOT EXISTS books1 (
+    bname STRING,
+    price INT,
+    author STRING
+)
+ROW FORMAT DELIMITED 
+FIELDS TERMINATED BY ',' 
+STORED AS TEXTFILE;
+
+OR
+
+load data local inpath '/home/student/Desktop/books1.txt' 
+into table books1;
+
+-- Insert 3 rows into books1 table
+INSERT INTO TABLE books1 VALUES
+('Mayechi Sawli', 200, 'Rutuja Jamdhade'),
+('Casual', 500, 'Sanket'),
+('Vidya Niketan', 255, 'Aniket Boraste');
+
+select * from books1;
+
+select * from books 
+union 
+select * from books1;
+
+select * from books 
+union all 
+select * from books1;
+
+select t1.* 
+from books t1 
+right join books1 t2 on t1.price = t2.price 
+where t2.price is null;
+
+select sum(price) as total_price 
+from books;
+
+select t1.* 
+from books t1 
+left join books1 t2 on t1.price = t2.price 
+where t2.price is null;
+
+insert into table books 
+values('bookname',588,'kalyani');
+
+select * from books;
+select * from books1;
+
+
+2nd option
+
+
+
+
+
+
+
+sudo su hduser
+cd
+start-dfs.sh
+start-yarn.sh
+jps
+cd /usr/local/hive/bin
+./hive
+
+CREATE DATABASE idigo;
+USE idigo;
+
+-- Step 1: Create and use database
+CREATE DATABASE IF NOT EXISTS idigo;
+USE idigo;
+
+-- Step 2: Create the airline table
+CREATE TABLE IF NOT EXISTS airline (
+    airline_id STRING,
+    airline_name STRING,
+    country STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+-- Step 3: Insert data into airline
+INSERT INTO TABLE airline VALUES
+('A1', 'IndiGo', 'India'),
+('A2', 'Air India', 'India'),
+('A3', 'SpiceJet', 'India'),
+('A4', 'Vistara', 'India'),
+('A5', 'GoAir', 'India');
+
+-- Step 4: Create the flight table (added 'd' column for description)
+CREATE TABLE IF NOT EXISTS flight (
+    flight_id STRING,
+    airline_id STRING,
+    departure_delay INT,
+    flight_date STRING,
+    d STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+-- Step 5: Insert data into flight (include 'd' description field)
+INSERT INTO TABLE flight VALUES
+('F1', 'A1', 15, '2008-01-01', 'Morning flight'),
+('F2', 'A2', 25, '2008-01-01', 'Evening flight'),
+('F3', 'A3', 0,  '2008-01-02', 'No delay'),
+('F4', 'A4', 10, '2008-01-02', 'Minor delay'),
+('F5', 'A1', 5,  '2008-01-03', 'Late start');
+
+-- Step 6: Join airline and flight tables to see combined info
+SELECT 
+    f.flight_id, 
+    f.flight_date,
+    a.airline_name, 
+    f.departure_delay, 
+    f.d AS description
+FROM flight f
+JOIN airline a 
+ON f.airline_id = a.airline_id;
+
+-- Step 7: Calculate average departure delay per day (2008)
+SELECT 
+    flight_date, 
+    ROUND(AVG(departure_delay), 2) AS avg_delay
+FROM flight
+WHERE flight_date LIKE '2008-%'
+GROUP BY flight_date
+ORDER BY flight_date;
+
+-- 1. LEFT JOIN: All flights with airline info, even if airline info is missing
+SELECT 
+    f.flight_id,
+    f.flight_date,
+    f.departure_delay,
+    f.d AS description,
+    a.airline_name,
+    a.country
+FROM flight f
+LEFT JOIN airline a
+ON f.airline_id = a.airline_id;
+
+-- 2. RIGHT JOIN: All airlines, and flights if any, else NULL for flights
+SELECT 
+    f.flight_id,
+    f.flight_date,
+    f.departure_delay,
+    f.d AS description,
+    a.airline_name,
+    a.country
+FROM flight f
+RIGHT JOIN airline a
+ON f.airline_id = a.airline_id;
+
+-- 3. UNION: Combine distinct flight IDs and airline IDs (example union of IDs)
+-- Note: UNION removes duplicates, UNION ALL keeps duplicates
+-- This example unions IDs from both tables for demonstration
+
+SELECT airline_id AS id FROM airline
+UNION
+SELECT flight_id AS id FROM flight;
+
+-- 4. UNION ALL: Combine all IDs including duplicates
+SELECT airline_id AS id FROM airline
+UNION ALL
+SELECT flight_id AS id FROM flight;
+
+
+-- Step 8: Create an index on airline_id in the flight table
+CREATE INDEX flight_airline_idx 
+ON TABLE flight (airline_id) 
+AS 'COMPACT' 
+WITH DEFERRED REBUILD;
+
+-- Optional: Rebuild index after creation
+ALTER INDEX flight_airline_idx 
+ON flight 
+REBUILD;
+
+
+run in hive 
+hive -f indigo_flight_analysis.hql
 
 
